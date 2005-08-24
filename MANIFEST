@@ -5,6 +5,7 @@ MANIFEST
 README
 t/Ldraw.t
 lib/Lego/Ldraw.pm
+lib/Lego/Ldraw.pod
 lib/Lego/Ldraw/Line.pm
 lib/Lego/Ldraw/Display.pm
 lib/Lego/Ldraw/colors.yml

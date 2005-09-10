@@ -13,7 +13,7 @@ use overload
     '@{}' => \&lines,
     '""' => \&stringify;
 
-our $VERSION = "0.5.1";
+our $VERSION = "0.5.2";
 
 sub new {
     my $proto = shift;
@@ -83,7 +83,7 @@ sub add {
 	push @{$self->{lines}}, $line;
     }
     $self->{tree}->{$line->part}->{$line->color}++;
-    $line->model($self);
+    $line->dir($self->dir);
 }
 
 sub splice {
@@ -209,11 +209,13 @@ sub Lego::Ldraw::build_tree {
     }
   }
   my $t;
+  $b = undef;
+  $d = undef;
+  $s = undef;
 }
 
 sub Lego::Ldraw::recurse_part_tree {
   my $tree = shift->copy;
-
   my ($b, $d, $s, $test) = @_;
   $test = $test || sub { shift->type == 1 };
 
@@ -229,6 +231,10 @@ sub Lego::Ldraw::recurse_part_tree {
       }
     }
   }
+  $b = undef;
+  $d = undef;
+  $s = undef;
+  $tree = undef;
 }
 
 1;

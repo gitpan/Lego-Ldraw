@@ -1,6 +1,0 @@
-Revision history for Perl extension Ldraw.
-
-0.01  Tue Jan  4 22:17:06 2005
-	- original version; created by h2xs 1.23 with options
-		-X -n Ldraw
-

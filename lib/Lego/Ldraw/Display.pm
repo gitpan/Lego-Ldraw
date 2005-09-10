@@ -6,6 +6,7 @@ use warnings; no warnings qw/void uninitialized/;
 use Carp;
 
 use Math::Trig;
+use Math::Trig ':radial';
 use Math::VectorReal;
 
 use OpenGL qw/ :all /;
@@ -68,55 +69,43 @@ sub camera {
   return @{ $self->{camera} };
 }
 
-
-use Math::Trig ':radial';
-sub move_camera {
-  my $self = shift;
-  my ($how, $what, $qty) = @_;
-  for ($how) {
-    /^x/ && do {
-      $qty = $qty || 8;
-      for ($what) {
-	(/x/ || /1/) && do {
-	  $self->{camera}->[0] += $qty;
-	};
-	(/y/ || /2/) && do {
-	  $self->{camera}->[1] += $qty;
-	};
-	(/z/ || /3/) && do {
-	  $self->{camera}->[2] += $qty;
-	};
-      };
-      last;
-    };
-    /^s/ && do {
-      my ($x, $y, $z) = @{ $self->{camera} };
-      $qty = $qty || 12;
-      my ($rho, $theta, $phi) = cartesian_to_spherical ($x, $z, $y); # rotate around y axis
-      for ($what) {
-	(/r/ || /1/) && do {
-	  $rho += $qty ;
-	};
-	(/t/ || /2/) && do {
-	  $qty = deg2rad($qty);
-	  $theta += $qty;
-	};
-	(/p/ || /3/) && do {
-	  $qty = deg2rad($qty);
-	  $phi += $qty;
-	};
-      };
-      ($x, $z, $y) = spherical_to_cartesian($rho, $theta, $phi);
-      $self->{camera} = [ $x, $y, $z ];
-      last;
-    };
-  }
-}
-
 sub lookat {
   my $self = shift;
   if (@_) { $self->{lookat} = [@_] }
   return @{ $self->{lookat} };
+}
+
+sub move_camera {
+  shift->move('camera', @_);
+}
+
+sub move {
+  my $self = shift;
+  my ($point, $how, $what, $qty) = @_;
+  for ($how) {
+    /^x/ && do {
+      $qty = $qty || 8;
+      for ($what) {
+	(/x/ || /1/) && do { $self->{$point}->[0] += $qty; };
+	(/y/ || /2/) && do { $self->{$point}->[1] += $qty; };
+	(/z/ || /3/) && do { $self->{$point}->[2] += $qty; };
+      };
+      last;
+    };
+    /^s/ && do {
+      my ($x, $y, $z) = @{ $self->{$point} };
+      $qty = $qty || 12;
+      my ($rho, $theta, $phi) = cartesian_to_spherical ($x, $z, $y); # rotate around y axis
+      for ($what) {
+	(/r/ || /1/) && do { $rho += $qty ; };
+	(/t/ || /2/) && do { $qty = deg2rad($qty);  $theta += $qty; };
+	(/p/ || /3/) && do { $qty = deg2rad($qty);  $phi += $qty; };
+      };
+      ($x, $z, $y) = spherical_to_cartesian($rho, $theta, $phi);
+      $self->{$point} = [ $x, $y, $z ];
+      last;
+    };
+  }
 }
 
 ######################################################
@@ -137,8 +126,9 @@ sub display {
 
   my @parts = @{$ldraw};
   local $, = " "; local $\ = "\n";
-
-  $ldraw->build_gl_tree unless $self->{changed};
+  if (!$self->{count} || $self->{changed}) {
+    $ldraw->build_gl_tree;
+  }
 
   for my $part (@parts) {
     next unless $part->type;
@@ -147,20 +137,17 @@ sub display {
     } else {
       $self->display_primitive($part);
     }
-#    glutSwapBuffers() unless $self->{count};
   }
   glutSwapBuffers();
-  $self->{changed}++;
   $self->{count}++;
 }
 
-use Data::Dumper;
 sub build_list {
   shift;
   my $part = shift;
   unless (ref $part) {
     $part = Lego::Ldraw::Line->new_from_part_name($part);
-    $part->model(${$self->{ldraw}});
+    #$part->model(${$self->{ldraw}});
   }
   my $lcolor = shift; $lcolor = $part->color unless defined $lcolor;
   return if defined $self->{GL_LISTS}->{$part->name}->{$lcolor};
@@ -223,9 +210,10 @@ sub display_part {
   # first, check if a display list is
   # defined, and define one if not so...
   #-------------------------------------------
-  my $ln = $self->{GL_LISTS}->{$part->name}->{$part->color};
-  $self->{GL_LISTS}->{$part->name}->{$part->color} = $self->build_list($part)
-    unless (defined $ln);
+  my $ln;
+  unless (defined $self->{GL_LISTS}->{$part->name}->{$part->color}) {
+    $self->{GL_LISTS}->{$part->name}->{$part->color} = $self->build_list($part);
+  }
   $ln = $self->{GL_LISTS}->{$part->name}->{$part->color};
 
   #-------------------------------------------
@@ -315,6 +303,8 @@ sub bindspec {
 }
 
 sub init {
+  shift;
+  my $idlefunc = shift;
   glutInit();
   glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
   glutInitWindowSize($self->{width}, $self->{height});
@@ -322,13 +312,11 @@ sub init {
   $self->{id} = glutCreateWindow($self->{name});
 
   glutDisplayFunc(\&display);
-  glutIdleFunc(\&display);
+  glutIdleFunc( sub { &{$idlefunc}; &display } );
   glutReshapeFunc(\&resize);
   glutSpecialFunc(\&_specialkey);
 
-  #($self->{width}, $self->{height}) = (600, 800);
   ourInit($self->{width}, $self->{height});
-  #glutIdleFunc();
   glutMainLoop();
 }
 
@@ -366,7 +354,7 @@ sub prepare_display {
   shift;
   glDisable(GL_TEXTURE_2D);
   glDisable(GL_LIGHTING);
-  #glEnable(GL_LIGHTING);
+
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable(GL_BLEND);
   glEnable(GL_DEPTH_TEST);

@@ -1,8 +1,8 @@
-Changes
 Build.PL
 Makefile.PL
 MANIFEST
 README
+CHANGES
 t/Ldraw.t
 lib/Lego/Ldraw.pm
 lib/Lego/Ldraw.pod

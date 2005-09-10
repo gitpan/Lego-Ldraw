@@ -1,9 +1,9 @@
 ##########################################################
 # to do's:
 # 1) matrix correction for singular matrixes
-# 2) tidy up yml files search
+# 2) tidy up yml files search - done
 # 3) header generation - done (kindof)
-# 4) bounding box calculation
+# 4) bounding box calculation - not needed as povray does it
 # 5) metallic colors
 # 6) special color handling
 # 7) perl macro comments
@@ -51,11 +51,11 @@ sub pov_color {
 
   my $primitives;
   unless ($self->{colordefs}) {
-    open DATA, $self->{colors_file};
+    open DATA, $self->ymlfile('colors');
     $primitives = do { local $/; <DATA> };
     $self->{colordefs} = Load($primitives);
   }
-  my $def = $self->{colordefs}->{rgb}->{$color};
+  my $def = $self->{colordefs}->{rgb}->{$color} || 'pigment { rgb <0.5,0.5,0.5> }';
   return unless $def;
 
   $self->{template} = Template->new
@@ -110,7 +110,7 @@ sub toPOV {
   my $pov_name = $part->pov_name;
   unless ($self->{primitives}) {
     my $primitives;
-    open DATA, $self->{primitives_file};
+    open DATA, $self->ymlfile('primitives');
     $primitives = do { local $/; <DATA> };
     $self->{primitives} = Load($primitives);
   }
@@ -150,15 +150,21 @@ sub colordef {
 }
 
 sub ymlfile {
+  shift;
+  my $type = shift;
+  carp "File type unknow" unless ($type =~ /^primitives$/ || $type =~ /^colou*rs$/);
+
   local $_ = __PACKAGE__;
+
+  # get the directory the package resides in
   s/::[^:]+$//;
   s/::/\//g;
   my $pkgdir = $_;
 
   my $file;
   for ('.', $ENV{'HOME'}, Lego::Ldraw->basedir, map { join '/', $_, $pkgdir } @INC) {
-    if (-e join '/', $_, 'primitives.yml') {
-      $file = join '/', $_, 'primitives.yml';
+    if (-e join '/', $_, "$type.yml") {
+      $file = join '/', $_, "$type.yml";
       last;
     }
   }
@@ -316,7 +322,7 @@ sub Lego::Ldraw::Line::toPOV {
     };
     /4/ && do {
       my ($a, $b) = $self->quad_to_triangs;
-      return ('triangle {' . $a->pov_coords . "} triangle {" . $b->pov_coords . "}");
+      return ('triangle {' . $a->pov_coords . "}\n\t\t\ttriangle {" . $b->pov_coords . "}");
       last;
     };
   }

@@ -256,6 +256,12 @@ sub normalize {
   return $self;
 }
 
+sub dir {
+  my $self = shift;
+  $self->{dir} = shift if @_;
+  return $self->{dir};
+}
+
 sub partfile {
   my $self = shift;
   return unless $self->type == 1;
@@ -269,7 +275,7 @@ sub partfile {
   my @parts = @{$self->config->{parts}};
   @parts = map { $_ = $base . $_ . $part } @parts;
 
-  @parts = ('./' . $part, $self->model->dir . '/' . $part, @parts);
+  @parts = ('./' . $part, $self->dir . '/' . $part, @parts);
 
   for (@parts) {
     s/\\/\//g;

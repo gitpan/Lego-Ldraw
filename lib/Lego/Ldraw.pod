@@ -1,6 +1,6 @@
 =head1 NAME
 
-Lego::Ldraw - Per extension for parsing, modifying, translating and
+Lego::Ldraw - Perl extension for parsing, modifying, translating and
 displaying Ldraw files
 
 =head1 SYNOPSIS
@@ -187,12 +187,6 @@ Clones the Line object
 
 Returns the Line object fields
 
-=head3 model
-
-  $model = $line->model
-
-Returns the model the line belongs to.
-
 =head3 description
 
 Returns the part's description, as listed in the Parts.lst generated at installation.
@@ -340,6 +334,18 @@ Rudimentary support for OpenGL display of Ldraw models is provided:
   $d = Lego::Ldraw::Display->new(300, 400, $l);
   $d->init;
 
+=head3 Requirements
+
+This part requires the OpenGL package that can be found at
+L<http://www.bribes.org/perl/wopengl.html>. Install the ppm binary
+provided by entering the following command  at the console:
+
+  ppm install http://www.bribes.org/perl/ppm/OpenGL.ppd
+
+Despite my efforts, Linux is not supported.
+
+=head3 Callbacks
+
 There is also limited callback support: import OpenGL constants, and
 use the bindspec method to bind callbacks. For example:
 
@@ -355,27 +361,69 @@ use the bindspec method to bind callbacks. For example:
 These features are likely to change to provide support for Tk
 interaction.
 
-This part requires the OpenGL package that can be found at
-L<http://www.bribes.org/perl/wopengl.html>. Install the ppm binary
-provided by entering the following command  at the console:
+=head3 Interaction with other event loops
 
-  ppm install http://www.bribes.org/perl/ppm/OpenGL.ppd
+  use Lego::Ldraw;
+  use Lego::Ldraw::Display;
+  use Tk;
 
-Despite my efforts, Linux is not supported.
+  my $l = Lego::Ldraw->new_from_file($ARGV[0]);
+  print $l->dir;
+
+  $d = Lego::Ldraw::Display->new(300, 400, $l);
+
+  $MW = MainWindow->new;
+
+  # more Tk stuff here...
+  $idle = sub { $MW->update };
+
+  $d->init($idle);
+
+You can pass a reference to a sub as the first argument to the init
+method, and the sub will be executed during OpenGL's idle cycle. the
+example above shows how to use Tk in conjunction with the OpenGL
+display.
+
+=head3 Camera and lookat positioning
+
+  use Lego::Ldraw;
+  use Lego::Ldraw::Display;
+  use Tk;
+
+  my $l = Lego::Ldraw->new_from_file($ARGV[0]);
+  print $l->dir;
+
+  $d = Lego::Ldraw::Display->new(300, 400, $l);
+
+  $MW = MainWindow->new;
+
+  # more Tk stuff here...
+  $idle = sub { $MW->update };
+
+  $d->init($idle);
+  $d->move('camera', 's', 'z', +12);
+
+You can move the camera and the point it's looking at (lookat) with the "move" method.
+
+  $d->move($point, $movement_type, $axis, $distance)
+
+C<$point> is either 'camera' or 'lookat'.
+
+C<$movement_type> is either 'x' for axial (move along an axis) or 's' for
+spherical, which moves on a sphere around the reference point. The
+reference point is the camera if you move lookat and lookat if you
+move the camera.
+
+C<$axis> determines the axis along which you move and it can be 'x' 'y' or 'z'.
+
 
 =head1 TO DO
 
 =over
 
-=item * Tidy up config files lookup all over.
-
-=item * Provide callback mechanism for OpenGL idle function in display.
-
 =item * Matrix correction for singular matrixes in POV
 
 =item * Better header generation in POV
-
-=item * Bounding box calculation
 
 =item * Better color handling in Display and POV
 

@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name: Lego-Ldraw
-version: 0.5.2
+version: 0.5.3
 author: ~
 abstract: ~
 license: perl
@@ -14,7 +14,7 @@ requires:
 provides:
   Lego::Ldraw:
     file: lib/Lego/Ldraw.pm
-    version: 0.5.2
+    version: 0.5.3
   Lego::Ldraw::Display:
     file: lib/Lego/Ldraw/Display.pm
   Lego::Ldraw::Line:

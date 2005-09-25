@@ -12,6 +12,7 @@ lib/Lego/Ldraw/colors.yml
 lib/Lego/Ldraw/primitives.yml
 lib/Lego/Ldraw/POV.pm
 examples/display.pl
-examples/ldsed.pl
+examples/lsed.pl
+examples/lsed.bat
 examples/pov.pl
 META.yml                                 Module meta-data (added by MakeMaker)

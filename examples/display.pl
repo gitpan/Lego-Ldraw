@@ -1,5 +1,3 @@
-use lib '../../lib';
-
 use Lego::Ldraw;
 use Lego::Ldraw::Display;
 use OpenGL qw/ :all /;

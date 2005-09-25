@@ -13,7 +13,7 @@ use overload
     '@{}' => \&lines,
     '""' => \&stringify;
 
-our $VERSION = "0.5.5";
+our $VERSION = "0.5.6";
 
 sub new {
     my $proto = shift;
@@ -28,6 +28,12 @@ sub new {
 
     bless ($self, $class);
     return $self;
+}
+
+sub DESTROY {
+  my $self = shift;
+  $_->{model} = undef for @{$self->lines};
+  $self = undef;
 }
 
 sub new_from_file {

@@ -443,9 +443,14 @@ L3P, a more mature Ldraw to pov-ray translator: L<http://www.hassings.dk/l3/l3p.
 
 Simone Cesano
 
+=head1 THANKS
+
+Thanks to Lars C. Hassing for letting me use his primitives in the Lego::Ldraw::POV module.
+
 =head1 COPYRIGHT AND LICENSE
 
 Copyright (C) 2005 by Simone Cesano
 
-=cut
+The primitives the Lego::Ldraw::POV module are Copyright (C) 1998-2001 Lars C. Hassing
 
+=cut

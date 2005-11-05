@@ -409,6 +409,7 @@ sub INIT {
   $config = do { local $/; <DATA> };
   $config = Load($config);
 
+  $config->{base} = $ENV{'LDRAWDIR'};
   open DESCRIPTIONS, $config->{base} . 'parts.lst' || return;
   while (<DESCRIPTIONS>) {
     chop;

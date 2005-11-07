@@ -10,3 +10,5 @@ Revision history for Perl extension Ldraw.
 	- fixed file search mechanism in Lego::Ldraw::POV
         - fixed circular reference in Lego::Ldraw::Line
 	- added option for idle callback to Lego::Ldraw::Display
+
+0.5.5 to 0.5.71 Minor documentation and distribution fixes

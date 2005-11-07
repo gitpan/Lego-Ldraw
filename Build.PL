@@ -9,6 +9,5 @@ Module::Build->new(
 				'Math::VectorReal' => 0,
 				'Math::MatrixReal' => 0,
 				'YAML' => 0,
-				'OpenGL' => 0
 			       },
 		  )->create_build_script;

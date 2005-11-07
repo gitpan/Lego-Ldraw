@@ -13,7 +13,7 @@ use overload
     '@{}' => \&lines,
     '""' => \&stringify;
 
-our $VERSION = "0.5.71";
+our $VERSION = "0.5.7.1";
 
 sub new {
     my $proto = shift;
